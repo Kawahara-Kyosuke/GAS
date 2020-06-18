@@ -44,15 +44,16 @@ function search() {
           
   for(let i = 8; i <= 13; i++) {
     var KC1 = counts.getRange(i, 1).getValue(); 　//ツール上のKC番号
+    var KC_time = counts.getRange(i, 2).getValues(); //時間
 
     if(counts.getRange(i, 1).getValue() === '' ){      
       console.log(i, "NO")　　　　　　　　　　　　　　　//空白行の時ログ出力(確認用)
      
     }else if ( valuesA.flat().indexOf(KC1)!= -1) {
-      Browser.msgBox(KC1 + "の稼働時間を労務費管理表に入力しました。");　　//一致するKC番号が管理表上に存在するとき
+      Browser.msgBox(month + "月のKC番号" + KC1 + "の稼働時間" + KC_time +"時間を労務費管理表に入力します。");　　//一致するKC番号が管理表上に存在するとき
       
       var Col1 = valuesA.flat().indexOf(KC1); 　//KC(行)
-      var KC_time = counts.getRange(i, 2).getValues(); //時間
+
       count_copy.getRange(ColA+Col1+1, Row1+1).setValue(KC_time); //時間入力  
       
     } else {
