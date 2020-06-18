@@ -37,21 +37,26 @@ function search() {
   const values3 = count_copy.getRange(1, 2, count_copy.getLastRow() - 1).getValues(); 
   var name = counts.getRange('B3').getValue();  //名前指定
   var month = counts.getRange('B4').getValue(); //月指定
-
-  
-  //入力者照合   
+　var test = counts.getRange('A8').getValue();
   var ColA = values3.flat().indexOf(name); //名前記載先頭行
   var valuesA = count_copy.getRange(ColA+1, 3, 10 ,1).getValues(); //名前準拠の検索範囲
-  
-  //稼働入力
+  var Row1 = values[2].indexOf(month);　// 月(列)  
+          
   for(let i = 8; i <= 13; i++) {
-        if(counts.getRange(i, 1).getValue()){ 
-          var KC1 = counts.getRange(i, 1).getValue(); // 
-          var Row1 = values[2].indexOf(month);　// 月(列)
-          var Col1 = valuesA.flat().indexOf(KC1); 　//KC(行)
-          var KC_time = counts.getRange(i, 2).getValues(); //時間
-  
-          count_copy.getRange(ColA+Col1+1, Row1+1).setValue(KC_time); //時間入力  
+    var KC1 = counts.getRange(i, 1).getValue(); 　//ツール上のKC番号
+
+    if(counts.getRange(i, 1).getValue() === '' ){      
+      console.log(i, "NO")　　　　　　　　　　　　　　　//空白行の時ログ出力(確認用)
+     
+    }else if ( valuesA.flat().indexOf(KC1)!= -1) {
+      Browser.msgBox(KC1 + "の稼働時間を労務費管理表に入力しました。");　　//一致するKC番号が管理表上に存在するとき
+      
+      var Col1 = valuesA.flat().indexOf(KC1); 　//KC(行)
+      var KC_time = counts.getRange(i, 2).getValues(); //時間
+      count_copy.getRange(ColA+Col1+1, Row1+1).setValue(KC_time); //時間入力  
+      
+    } else {
+          Browser.msgBox(KC1 + "が労務費管理表上に存在しません。");　　　 //一致するKC番号が存在しないとき
         }
   }
 }
