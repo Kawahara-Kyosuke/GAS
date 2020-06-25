@@ -10,22 +10,24 @@ function myFunctionAggregate() {
   checks.getRange(8, 5).copyTo(counts.getRange(4, 2),{contentsOnly:true}) //月度
   checks.getRange(13, 9).copyTo(counts.getRange(5, 2),{contentsOnly:true}) //支払時間
   checks.getRange(18, 4).copyTo(counts.getRange(6, 2),{contentsOnly:true}) //時間外
-  checks.getRange('B34:B84').copyTo(counts.getRange('D2:D52'),{contentsOnly:true}) //日付
-  checks.getRange('J34:J84').copyTo(counts.getRange('E2:E52'),{contentsOnly:true}) //プロジェクト名
-  checks.getRange('AI34:AI84').copyTo(counts.getRange('F2:F52'),{contentsOnly:true}) //プロジェクト時間 
+  checks.getRange('B34:B84').copyTo(counts.getRange('E2:E52'),{contentsOnly:true}) //日付
+  checks.getRange('J34:J84').copyTo(counts.getRange('F2:F52'),{contentsOnly:true}) //プロジェクト名
+  checks.getRange('AI34:AI84').copyTo(counts.getRange('G2:G52'),{contentsOnly:true}) //プロジェクト時間 
 
   //表示形式変更
-  var range1=counts.getRange("B3:B14");
-  var range2=counts.getRange("F2:F52");
-  var range3=counts.getRange("A1:F52");
-  range1.setNumberFormat('#,##0.00');
+  var range1=counts.getRange("B3:B15");
+  var range2=counts.getRange("G2:G52");
+  var range3=counts.getRange("B5:B6");
+  var range4=counts.getRange("B9:B14");
+  var range5=counts.getRange("A1:G52");
+  range1.setNumberFormat('#,##0');
   range2.setNumberFormat('#,##0.00');
-  range3.setFontFamily("Calibri");
-
+  range3.setNumberFormat('#,##0.00');  
+  range4.setNumberFormat('#,##0.00');  
+  range5.setFontFamily("Calibri"); 
 }
 
 //手順2.読み取った内容から労務費管理シートに入力
-//入力セル検索
 function search() {
   //変数
   const ss = SpreadsheetApp.getActiveSpreadsheet(); //現在アクティブなスプレッドシートを取得
@@ -37,26 +39,50 @@ function search() {
   const values3 = count_copy.getRange(1, 2, count_copy.getLastRow() - 1).getValues(); 
   var name = counts.getRange('B3').getValue();  //名前指定
   var month = counts.getRange('B4').getValue(); //月指定
-　var test = counts.getRange('A8').getValue();
   var ColA = values3.flat().indexOf(name); //名前記載先頭行
-  var valuesA = count_copy.getRange(ColA+1, 3, 10 ,1).getValues(); //名前準拠の検索範囲
+  var valuesA = count_copy.getRange(ColA+1, 3, 14 ,1).getValues(); //名前準拠の検索範囲
   var Row1 = values[2].indexOf(month);　// 月(列)  
-          
-  for(let i = 8; i <= 13; i++) {
+  var time1 = counts.getRange('B5').getValue(); //就業時間
+  var time2 = counts.getRange('B6').getValue(); //時間外
+  var Col1 = valuesA.flat().indexOf('就業時間（H）'); //就業時間の入力業検索
+  var Col2 = valuesA.flat().indexOf('時間外労働時間（H）'); //時間外の入力業検索
+  
+  //手順2-1.就業時間入力
+  var msg1 = Browser.msgBox(month + "月の勤務時間入力","就業時間（H）:" + time1 ,Browser.Buttons.OK_CANCEL);
+  if(msg1 == "cancel"){
+    Browser.msgBox("入力を中止します")
+    return;
+  }else{
+    count_copy.getRange(ColA+Col1+1,Row1+1).setValue(time1);//実労働
+  }
+
+  //手順2-2.時間外労働時間入力
+  var msg2 = Browser.msgBox(month + "月の勤務時間入力","時間外労働時間（H）:" + time2 ,Browser.Buttons.OK_CANCEL);
+  if(msg2 == "cancel"){
+    Browser.msgBox("入力を中止します")
+    return;
+  }else{
+    count_copy.getRange(ColA+Col2+1,Row1+1).setValue(time2);//時間外
+  }
+  
+  //手順2-3.労務費入力
+  for(let i = 9; i <= 14; i++) {
     var KC1 = counts.getRange(i, 1).getValue(); 　//ツール上のKC番号
+    var KC_Cost = counts.getRange(i, 3).getValues(); //労務費
 
     if(counts.getRange(i, 1).getValue() === '' ){      
       console.log(i, "NO")　　　　　　　　　　　　　　　//空白行の時ログ出力(確認用)
      
     }else if ( valuesA.flat().indexOf(KC1)!= -1) {
-      Browser.msgBox(KC1 + "の稼働時間を労務費管理表に入力しました。");　　//一致するKC番号が管理表上に存在するとき
+      var msg3 = Browser.msgBox(month + "月労務費入力" ,"KC番号" + KC1 + "の労務費" + KC_Cost +"を管理表に入力します。" ,Browser.Buttons.OK);　　//一致するKC番号が管理表上に存在するとき
       
-      var Col1 = valuesA.flat().indexOf(KC1); 　//KC(行)
-      var KC_time = counts.getRange(i, 2).getValues(); //時間
-      count_copy.getRange(ColA+Col1+1, Row1+1).setValue(KC_time); //時間入力  
+      var Col3 = valuesA.flat().indexOf(KC1); 　//KC(行)
+
+      count_copy.getRange(ColA+Col3+1, Row1+1).setValue(KC_Cost); //時間入力  
       
     } else {
-          Browser.msgBox(KC1 + "が労務費管理表上に存在しません。");　　　 //一致するKC番号が存在しないとき
+      
+      var msg4 = Browser.msgBox(month + "月労務費入力"  ,KC1 + "が労務費管理表上に存在しません。",Browser.Buttons.OK);　　　 //一致するKC番号が存在しないとき
         }
   }
 }
@@ -68,9 +94,9 @@ function myFunctionReset() {
   var ss = SpreadsheetApp.getActive();// 現在アクティブなスプレッドシートを取得
   var counts = ss.getSheetByName("count"); //確認用シートを取得
 
-
-  counts.getRange('B3:B13').clearContent();
-  counts.getRange('D2:F52').clearContent();
+  counts.getRange('B3:B6').clearContent();
+  counts.getRange('B9:B14').clearContent();  
+  counts.getRange('E2:G52').clearContent();
   
   // そのスプレッドシートにある シート名:テスト用シート のシートを取得 
   var deletesheet1 = ss.getSheetByName('プロジェクトNoチェックリスト');
