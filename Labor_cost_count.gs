@@ -53,23 +53,11 @@ function search() {
   var Col2 = valuesA.flat().indexOf('時間外労働時間（H）'); //時間外の入力行検索
   
   //手順2-1.就業時間入力
-  var msg1 = Browser.msgBox(month + "月の勤務時間入力","就業時間（H）:" + time1 ,Browser.Buttons.OK_CANCEL);
-  if(msg1 == "cancel"){
-    Browser.msgBox("入力を中止しました。")
-    return;
-  }else{
     count_copy.getRange(ColA+Col1+1,Row1+1).setValue(time1);//実労働
-  }
 
   //手順2-2.時間外労働時間入力
-  var msg2 = Browser.msgBox(month + "月の勤務時間入力","時間外労働時間（H）:" + time2 ,Browser.Buttons.OK_CANCEL);
-  if(msg2 == "cancel"){
-    Browser.msgBox("入力を中止しました。")
-    return;
-  }else{
     count_copy.getRange(ColA+Col2+1,Row1+1).setValue(time2);//時間外
-  }
-  
+
   //手順2-3.労務費入力
   for(let i = 9; i <= 14; i++) {
     var KC1 = counts.getRange(i, 1).getValue(); 　//ツール上のKC番号
@@ -78,13 +66,13 @@ function search() {
     if(counts.getRange(i, 1).getValue() === '' ){      
       console.log(i, "NO")　　　　　　　　　　　　　　　//空白行の時ログ出力(確認用)    
     }else if ( valuesA.flat().indexOf(KC1)!= -1) {
-      var msg3 = Browser.msgBox(month + "月労務費入力" ,"KC番号" + KC1 + "の労務費" + KC_Cost +"（千円）を管理表に入力します。" ,Browser.Buttons.OK);　　//一致するKC番号が管理表上に存在するとき
       var Col3 = valuesA.flat().indexOf(KC1); 　//KC(行)
       count_copy.getRange(ColA+Col3+1, Row1+1).setValue(KC_Cost); //時間入力        
     } else {
-      var msg4 = Browser.msgBox(month + "月労務費入力"  ,KC1 + "が労務費管理表上に存在しません。",Browser.Buttons.OK);　　　 //一致するKC番号が存在しないとき
+     var msg1 = Browser.msgBox(month + "月労務費入力"  ,KC1 + "が労務費管理表上に存在しません。",Browser.Buttons.OK);　　　 //一致するKC番号が存在しないとき
         }
   }
+  var msg2 = Browser.msgBox(month + "月労務費", "入力が完了しました。",Browser.Buttons.OK);
 }
 
 
@@ -96,17 +84,10 @@ function myFunctionReset() {
   var deletesheet1 = ss.getSheetByName('プロジェクトNoチェックリスト');
   var deletesheet2 = ss.getSheetByName('勤怠票（備考)'); 
 
-  var msg5 = Browser.msgBox("削除","入力内容、入力シートを削除します。" ,Browser.Buttons.OK_CANCEL);
-  
-  if(msg5 == "cancel"){
-    var msg6 = Browser.msgBox("削除","削除を中止しました。" ,Browser.Buttons.OK)
-    return;
-  }else{
     counts.getRange('B3:B6').clearContent();  //集計シート上の入力値を削除
     counts.getRange('B9:B14').clearContent();  
     counts.getRange('E2:G52').clearContent();
     ss.deleteSheet(deletesheet1);  // 追加したシートを削除
     ss.deleteSheet(deletesheet2);  
-    var msg7 = Browser.msgBox("削除","削除が完了しました。" ,Browser.Buttons.OK)
-  } 
+    var msg3 = Browser.msgBox("削除","削除が完了しました。" ,Browser.Buttons.OK)
 }
